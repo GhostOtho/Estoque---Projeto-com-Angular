@@ -1,0 +1,82 @@
+main {
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 24px;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #1f2937;
+}
+
+h1 {
+  margin-bottom: 16px;
+  color: #111827;
+}
+
+h2 {
+  margin: 24px 0 12px;
+  font-size: 1.2rem;
+}
+
+.erro {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+button[type="button"] {
+  background-color: #4b5563;
+}
+
+button[type="button"]:hover {
+  background-color: #374151;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #f3f4f6;
+}
+
+td button {
+  margin-right: 6px;
+}

@@ -1,12 +1,12 @@
 <main>
   <h1>Gestão de Estoque</h1>
 
-  @if (mensagemErro) {
-    <p class="erro">{{ mensagemErro }}</p>
+  @if (mensagemErro()) {
+    <p class="erro">{{ mensagemErro() }}</p>
   }
 
   <!-- Tela de Login (aparece quando não há token) -->
-  @if (!token) {
+  @if (!token()) {
     <section>
       <h2>Login</h2>
       <form (ngSubmit)="fazerLogin()">
@@ -14,14 +14,15 @@
         <input type="password" placeholder="Senha" [(ngModel)]="senha" name="senha" required />
         <button type="submit">Entrar</button>
       </form>
-      <!-- Botão útil para demonstrar o erro 401 sem token na apresentação -->
+
+      <!-- Botão para demonstrar o erro 401 sem token -->
       <button type="button" (click)="carregarProdutos()">Testar acesso sem token (401)</button>
     </section>
   } @else {
     <!-- Tela do CRUD (aparece após login válido) -->
     <section>
       <div>
-        <span>Token ativo: {{ token }}</span>
+        <span>Token ativo: {{ token() }}</span>
         <button type="button" (click)="sair()">Sair</button>
       </div>
 
@@ -53,7 +54,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (produto of produtos; track produto.Id) {
+          @for (produto of produtos(); track produto.Id) {
             <tr>
               <td>{{ produto.Id }}</td>
               <td>{{ produto.Nome }}</td>

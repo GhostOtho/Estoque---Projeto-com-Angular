@@ -1,13 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-/* 
-Classe Produto representa um produto no estoque, com propriedades como id, nome, preço, categoria, fornecedor e quantidade. 
-Ela inclui métodos para validar e acessar essas propriedades, além de calcular o faturamento do produto.
-o export em class Produto permite que a classe seja utilizada em outros arquivos do projeto, 
-facilitando a modularidade e reutilização do código.
-*/
-
 export class Produto {
   id: number;
   nome: string;
@@ -15,8 +8,6 @@ export class Produto {
   categoria: string;
   fornecedor: string;
   quantidade: number;
-
-  //Este constructor inicializa um novo objeto Produto com os valores fornecidos para id, nome, preço, categoria, fornecedor e quantidade.
 
   constructor(id: number, nome: string, preco: number, categoria: string, fornecedor: string, quantidade: number) {
     this.id = id;
@@ -27,23 +18,15 @@ export class Produto {
     this.quantidade = quantidade;
   }
 
-  /*
-  Aqui estão os métodos getters e setters para cada propriedade da classe Produto. 
-  Eles incluem validações para garantir que os valores atribuídos sejam válidos, 
-  como verificar se o ID é um número positivo, se o nome não é vazio ou numérico, 
-  se o preço não é negativo, entre outros.
-  */
   get Id(): number {
     return this.id;
   }
   set Id(value: number) {
     if (typeof value !== 'number' || isNaN(value)) {
       throw new Error('O ID do produto deve ser um número válido.');
-    }
-    else if (value < 0) {
+    } else if (value < 0) {
       throw new Error('O ID do produto não pode ser negativo.');
-    }
-    else {
+    } else {
       this.id = value;
     }
   }
@@ -54,17 +37,13 @@ export class Produto {
   set Nome(value: string) {
     if (value.trim() === '') {
       throw new Error('O nome do produto não pode ser vazio.');
-    }
-    else if (typeof value !== 'string' || !isNaN(Number(value))) {
+    } else if (typeof value !== 'string' || !isNaN(Number(value))) {
       throw new Error('O nome do produto não pode ser um número.');
-    }
-    else if (value.length < 2) {
+    } else if (value.length < 2) {
       throw new Error('O nome do produto deve ter pelo menos 2 caracteres.');
-    }
-    else if (value.length > 50) {
+    } else if (value.length > 50) {
       throw new Error('O nome do produto não pode ter mais de 50 caracteres.');
-    }
-    else {
+    } else {
       this.nome = value;
     }
   }
@@ -75,8 +54,7 @@ export class Produto {
   set Preco(value: number) {
     if (value < 0) {
       throw new Error('O preço do produto não pode ser negativo.');
-    }
-    else if (typeof value !== 'number' || isNaN(value)) {
+    } else if (typeof value !== 'number' || isNaN(value)) {
       throw new Error('O preço do produto deve ser um número válido.');
     }
     this.preco = value;
@@ -88,11 +66,9 @@ export class Produto {
   set Categoria(value: string) {
     if (value.trim() === '') {
       throw new Error('A categoria do produto não pode ser vazia.');
-    }
-    else if (typeof value === 'number' || !isNaN(Number(value))) {
+    } else if (typeof value === 'number' || !isNaN(Number(value))) {
       throw new Error('A categoria do produto não pode ser um número.');
-    }
-    else {
+    } else {
       this.categoria = value;
     }
   }
@@ -103,11 +79,9 @@ export class Produto {
   set Fornecedor(value: string) {
     if (value.trim() === '') {
       throw new Error('O fornecedor do produto não pode ser vazio.');
-    }
-    else if (typeof value === 'number' || !isNaN(Number(value))) {
+    } else if (typeof value === 'number' || !isNaN(Number(value))) {
       throw new Error('O fornecedor do produto não pode ser um número.');
-    }
-    else {
+    } else {
       this.fornecedor = value;
     }
   }
@@ -118,17 +92,13 @@ export class Produto {
   set Quantidade(value: number) {
     if (value < 0) {
       throw new Error('A quantidade não pode ser negativa.');
-    }
-    else if (typeof value !== 'number' || isNaN(value)) {
+    } else if (typeof value !== 'number' || isNaN(value)) {
       throw new Error('A quantidade deve ser um número válido.');
-    }
-    else {
+    } else {
       this.quantidade = value;
     }
   }
 
-  // Metodo para calcular o faturamento do produto, multiplicando o preço pela quantidade em estoque.
-  
   faturamento(): number {
     return this.preco * this.quantidade;
   }
@@ -144,15 +114,12 @@ export class App {
   protected readonly title = signal('gestao-estoque');
   private apiUrl = 'http://localhost:3000';
 
-  // Dados do login e token guardado após autenticar
   usuario = '';
   senha = '';
-  token = '';
+  token = signal('');
+  produtos = signal<Produto[]>([]);
+  mensagemErro = signal('');
 
-  // Lista de objetos Produto exibida na tela
-  produtos: Produto[] = [];
-
-  // Campos do formulário de cadastro/edição
   idEditando: number | null = null;
   nome = '';
   preco = 0;
@@ -160,63 +127,65 @@ export class App {
   fornecedor = '';
   quantidade = 0;
 
-  mensagemErro = '';
-
-  // Faz login no backend (POST /login) e guarda o token recebido
   async fazerLogin() {
-    this.mensagemErro = '';
-
-    const resposta = await fetch(`${this.apiUrl}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuario: this.usuario, senha: this.senha }),
-    });
-
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      this.mensagemErro = dados.erro || 'Erro ao fazer login.';
-      return;
-    }
-
-    this.token = dados.token;
-    await this.carregarProdutos();
-  }
-
-  // Limpa o token para sair da conta (e permitir testar acesso sem token na apresentação)
-  sair() {
-    this.token = '';
-    this.produtos = [];
-    this.mensagemErro = '';
-  }
-
-  // Busca todos os produtos no backend (GET /produtos) enviando o token
-  async carregarProdutos() {
-    this.mensagemErro = '';
-
-    const resposta = await fetch(`${this.apiUrl}/produtos`, {
-      headers: { Authorization: `Bearer ${this.token}` },
-    });
-
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      this.mensagemErro = `${resposta.status} - ${dados.erro}`;
-      return;
-    }
-
-    // Transforma cada item recebido do backend em uma instância da classe Produto
-    this.produtos = dados.map(
-      (item: any) => new Produto(item.id, item.nome, item.preco, item.categoria, item.fornecedor, item.quantidade)
-    );
-  }
-
-  // Valida usando os setters da classe Produto e envia POST ou PUT para o backend
-  async salvarProduto() {
-    this.mensagemErro = '';
+    this.mensagemErro.set('');
 
     try {
-      // Usa os setters da classe Produto para validar os campos antes de enviar
+      const resposta = await fetch(`${this.apiUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: this.usuario, senha: this.senha }),
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        this.mensagemErro.set(dados.erro || 'Usuário ou senha inválidos.');
+        return;
+      }
+
+      this.token.set(dados.token);
+      await this.carregarProdutos();
+    } catch {
+      this.mensagemErro.set('Erro ao conectar no servidor. Verifique se o backend (porta 3000) está rodando.');
+    }
+  }
+
+  sair() {
+    this.token.set('');
+    this.produtos.set([]);
+    this.mensagemErro.set('');
+  }
+
+  async carregarProdutos() {
+    this.mensagemErro.set('');
+
+    try {
+      const resposta = await fetch(`${this.apiUrl}/produtos`, {
+        headers: { Authorization: `Bearer ${this.token()}` },
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        this.mensagemErro.set(`${resposta.status} - ${dados.erro}`);
+        return;
+      }
+
+      this.produtos.set(
+        dados.map(
+          (item: any) => new Produto(item.id, item.nome, item.preco, item.categoria, item.fornecedor, item.quantidade)
+        )
+      );
+    } catch {
+      this.mensagemErro.set('Erro ao conectar no servidor. Verifique se o backend (porta 3000) está rodando.');
+    }
+  }
+
+  async salvarProduto() {
+    this.mensagemErro.set('');
+
+    try {
       const produtoValidado = new Produto(0, 'temp', 0, 'temp', 'temp', 0);
       produtoValidado.Nome = this.nome;
       produtoValidado.Preco = Number(this.preco);
@@ -242,7 +211,7 @@ export class App {
         method: metodo,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.token}`,
+          Authorization: `Bearer ${this.token()}`,
         },
         body: JSON.stringify(corpo),
       });
@@ -250,18 +219,17 @@ export class App {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        this.mensagemErro = `${resposta.status} - ${dados.erro}`;
+        this.mensagemErro.set(`${resposta.status} - ${dados.erro}`);
         return;
       }
 
       this.limparFormulario();
       await this.carregarProdutos();
     } catch (erro: any) {
-      this.mensagemErro = erro.message;
+      this.mensagemErro.set(erro.message || 'Erro ao salvar produto.');
     }
   }
 
-  // Preenche o formulário com os dados do produto selecionado para edição
   editarProduto(produto: Produto) {
     this.idEditando = produto.Id;
     this.nome = produto.Nome;
@@ -271,23 +239,26 @@ export class App {
     this.quantidade = produto.Quantidade;
   }
 
-  // Remove um produto pelo ID (DELETE /produtos/:id)
   async excluirProduto(id: number) {
-    this.mensagemErro = '';
+    this.mensagemErro.set('');
 
-    const resposta = await fetch(`${this.apiUrl}/produtos/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${this.token}` },
-    });
+    try {
+      const resposta = await fetch(`${this.apiUrl}/produtos/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${this.token()}` },
+      });
 
-    const dados = await resposta.json();
+      const dados = await resposta.json();
 
-    if (!resposta.ok) {
-      this.mensagemErro = `${resposta.status} - ${dados.erro}`;
-      return;
+      if (!resposta.ok) {
+        this.mensagemErro.set(`${resposta.status} - ${dados.erro}`);
+        return;
+      }
+
+      await this.carregarProdutos();
+    } catch {
+      this.mensagemErro.set('Erro ao excluir produto.');
     }
-
-    await this.carregarProdutos();
   }
 
   limparFormulario() {
